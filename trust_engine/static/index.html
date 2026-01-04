@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Studio | Authenticity Protocol</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span>🛡️</span> Authenticity
+            </div>
+
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="showTab('dashboard')">Dashboard</li>
+                <li class="nav-item" onclick="showTab('integration')">Integration (SDK)</li>
+            </ul>
+
+            <div style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1)">
+                <div id="user-profile" style="font-size: 0.9rem; color: var(--text-muted);">
+                    Guest User
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- TAB: DASHBOARD -->
+            <div id="tab-dashboard">
+                <div class="header">
+                    <h1>Creator Studio</h1>
+                    <p>Manage your cryptographic identity and sign content.</p>
+                </div>
+
+                <div class="card-grid">
+                    <!-- 1. Identity -->
+                    <div class="card">
+                        <h3>🆔 Digital Identity</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                            Issue a C2PA-compliant x.509 certificate to sign your work.
+                        </p>
+                        <input type="text" id="username" placeholder="Enter Creator Name">
+                        <button onclick="register()">Issue Certificate</button>
+                        <div id="regStatus" class="status"></div>
+                    </div>
+
+                    <!-- 2. Sign -->
+                    <div class="card">
+                        <h3>✍️ Sign Content</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                            Soft-bind your identity to media (Images).
+                        </p>
+                        <input type="file" id="uploadFile" accept="image/*">
+                        <button onclick="signContent()">Sign & Download</button>
+                        <div id="signStatus" class="status"></div>
+                    </div>
+
+                    <!-- 3. Verify -->
+                    <div class="card">
+                        <h3>🔍 Verify Content</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                            Inspect C2PA manifests and validate chains.
+                        </p>
+                        <input type="file" id="verifyFile" accept="image/*">
+                        <button onclick="verifyContent()">Run Verification</button>
+                    </div>
+                </div>
+
+                <!-- Results Output -->
+                <div class="card" id="output-card" style="display:none;">
+                    <h3>Verification Result</h3>
+                    <pre id="verifyResult"
+                        style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; color: #a5b4fc;"></pre>
+                </div>
+            </div>
+
+            <!-- TAB: INTEGRATION -->
+            <div id="tab-integration" style="display:none;">
+                <div class="header">
+                    <h1>Platform Integration</h1>
+                    <p>Embed the "Truth Lens" into any website.</p>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Quick Start (JS SDK)</h3>
+                    <p style="margin-bottom: 1rem; color: var(--text-muted);">
+                        Add this script to your `
+
+                        <head>` to automatically verify images on your site.
+                    </p>
+
+                    <code>
+                        &lt;script src="http://localhost:8080/passport/sdk.js"&gt;&lt;/script&gt;
+                    </code>
+
+                    <p style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-muted);">
+                        Then, add the attribute to any image you want to protect:
+                    </p>
+
+                    <code>
+                        &lt;img src="photo.jpg" <b>data-c2pa-verify</b> /&gt;
+                    </code>
+
+                    <div style="margin-top: 2rem;">
+                        <a href="integration_demo.html" target="_blank">
+                            <button style="width: auto; background: var(--bg-dark); border: 1px solid var(--primary);">
+                                Launch Live Demo Feed ↗
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8080/api";
+        let registeredUser = "";
+
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active'); // simple hack
+
+            document.getElementById('tab-dashboard').style.display = tabName === 'dashboard' ? 'block' : 'none';
+            document.getElementById('tab-integration').style.display = tabName === 'integration' ? 'block' : 'none';
+        }
+
+        async function register() {
+            const username = document.getElementById("username").value;
+            if (!username) return alert("Please enter a name");
+
+            const btn = event.target;
+            btn.innerText = "Generating Keys...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/identity/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email: `${username}@test.com` })
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    registeredUser = username;
+                    document.getElementById("regStatus").className = "status success";
+                    document.getElementById("regStatus").innerText = "Identity Active (RSA/EC Keypair Generated)";
+                    document.getElementById("user-profile").innerHTML = `Logged in as: <span style="color:white; font-weight:bold">${username}</span>`;
+                }
+            } catch (e) {
+                alert("Error: " + e);
+            } finally {
+                btn.innerText = "Issue Certificate";
+                btn.disabled = false;
+            }
+        }
+
+        async function signContent() {
+            if (!registeredUser) return alert("Please register (Issue Certificate) first!");
+            const fileInput = document.getElementById("uploadFile");
+            if (fileInput.files.length === 0) return alert("Select a file");
+
+            const originalName = fileInput.files[0].name;
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("username", registeredUser);
+
+            const btn = event.target;
+            btn.innerText = "Signing...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/content/sign`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+
+                    const statusDiv = document.getElementById("signStatus");
+                    statusDiv.className = "status success";
+                    statusDiv.innerHTML = `
+                        Successfully Signed!<br>
+                        <a href="${url}" download="signed_${originalName}" style="color:white; text-decoration:underline">Download Signed Image ⬇</a>
+                    `;
+                } else {
+                    throw new Error("Signing failed");
+                }
+            } catch (e) {
+                document.getElementById("signStatus").className = "status error";
+                document.getElementById("signStatus").innerText = "Signing Failed.";
+            } finally {
+                btn.innerText = "Sign & Download";
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyContent() {
+            const fileInput = document.getElementById("verifyFile");
+            if (fileInput.files.length === 0) return alert("Select a file");
+
+            const btn = event.target;
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                const res = await fetch(`${API_URL}/content/verify`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await res.json();
+                document.getElementById("output-card").style.display = "block";
+
+                // Pretty color formatting for validity
+                const el = document.getElementById("verifyResult");
+                el.innerText = JSON.stringify(data, null, 2);
+
+                if (data.validation_state === "Valid") {
+                    el.style.borderLeft = "4px solid #4ade80";
+                } else {
+                    el.style.borderLeft = "4px solid #f87171";
+                }
+
+            } catch (e) {
+                alert("Verify failed");
+            } finally {
+                btn.innerText = "Run Verification";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

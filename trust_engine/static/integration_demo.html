@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsFeed | Authentic Media Demo</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .feed {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .user-info h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .user-info span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .card-img {
+            width: 100%;
+            display: block;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .actions {
+            border-top: 1px solid #eee;
+            padding: 10px 15px;
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="feed">
+        <div class="header">
+            <h1>NewsFeed</h1>
+            <p>Demonstrating the <b>Truth Lens SDK</b> integration.</p>
+        </div>
+
+        <!-- Post 1: Real/Signed Content -->
+        <div class="card">
+            <div class="card-header">
+                <div class="avatar" style="background: #007bff"></div>
+                <div class="user-info">
+                    <h3>Aniket (Creator)</h3>
+                    <span>2 mins ago</span>
+                </div>
+            </div>
+            <!-- This image has the attribute data-c2pa-verify -->
+            <!-- We point to the local API static signed image for demo purposes -->
+            <!-- In real life this would be a public URL -->
+            <img src="/api/content/temp_hosted_signed.jpg" class="card-img" data-c2pa-verify>
+
+            <div class="card-body">
+                <p>Just captured this beautiful sunset! #nofilter #authentic</p>
+            </div>
+            <div class="actions">
+                <span>Like</span>
+                <span>Comment</span>
+                <span>Share</span>
+            </div>
+        </div>
+
+        <!-- Post 2: Fake/Unsigned Content -->
+        <div class="card">
+            <div class="card-header">
+                <div class="avatar" style="background: #dc3545"></div>
+                <div class="user-info">
+                    <h3>Viral Bot 🤖</h3>
+                    <span>1 hour ago</span>
+                </div>
+            </div>
+            <img src="https://via.placeholder.com/600x400?text=Fake+AI+Image" class="card-img" data-c2pa-verify>
+
+            <div class="card-body">
+                <p>You won't believe what they found on Mars! 👽</p>
+            </div>
+            <div class="actions">
+                <span>Like</span>
+                <span>Comment</span>
+                <span>Share</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Integrate the SDK -->
+    <script src="/passport/sdk.js"></script>
+
+</body>
+
+</html>

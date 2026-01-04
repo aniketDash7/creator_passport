@@ -1,0 +1,26 @@
+# Python & Virtual Env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+.env
+
+# Sensitive Credentials (Keys & Certs)
+*.pem
+*.key
+*.crt
+*.der
+storage/creds/
+
+# Generated Content & Uploads
+sample_signed.jpg
+storage/uploads/
+*.tmp
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
