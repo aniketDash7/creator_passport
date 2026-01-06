@@ -11,6 +11,13 @@ class CryptoService:
         self.storage_dir = storage_dir
         os.makedirs(self.storage_dir, exist_ok=True)
 
+    def check_identity_exists(self, user_name: str) -> bool:
+        """Checks if a key and certificate already exist for the given user."""
+        safe_name = "".join(x for x in user_name if x.isalnum())
+        key_exists = os.path.exists(os.path.join(self.storage_dir, f"{safe_name}_key.pem"))
+        cert_exists = os.path.exists(os.path.join(self.storage_dir, f"{safe_name}_cert.pem"))
+        return key_exists or cert_exists
+
     def ensure_root_ca(self):
         """Generates Root CA if it doesn't exist."""
         root_key_path = os.path.join(self.storage_dir, "root_key.pem")

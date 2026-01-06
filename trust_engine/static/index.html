@@ -137,28 +137,41 @@
 
         async function register() {
             const username = document.getElementById("username").value;
+            const regStatus = document.getElementById("regStatus");
             if (!username) return alert("Please enter a name");
 
             const btn = event.target;
             btn.innerText = "Generating Keys...";
             btn.disabled = true;
+            regStatus.innerText = "";
 
             try {
                 const res = await fetch(`${API_URL}/identity/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email: `${username}@test.com` })
+                    body: JSON.stringify({ username, email: `${username}@example.com` })
                 });
+
                 const data = await res.json();
 
-                if (data.status === "success") {
+                if (res.ok) {
                     registeredUser = username;
-                    document.getElementById("regStatus").className = "status success";
-                    document.getElementById("regStatus").innerText = "Identity Active (RSA/EC Keypair Generated)";
+                    regStatus.className = "status success";
+                    regStatus.innerText = "Identity Active (RSA/EC Keypair Generated)";
                     document.getElementById("user-profile").innerHTML = `Logged in as: <span style="color:white; font-weight:bold">${username}</span>`;
+                } else {
+                    regStatus.className = "status error";
+                    if (res.status === 422) {
+                        // Validation error from FastAPI
+                        const details = data.detail.map(d => `${d.loc[1]}: ${d.msg}`).join(", ");
+                        regStatus.innerText = "Validation Error: " + details;
+                    } else {
+                        regStatus.innerText = data.detail || "Registration failed";
+                    }
                 }
             } catch (e) {
-                alert("Error: " + e);
+                regStatus.className = "status error";
+                regStatus.innerText = "Connection Error: " + e.message;
             } finally {
                 btn.innerText = "Issue Certificate";
                 btn.disabled = false;
